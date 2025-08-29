@@ -2,8 +2,10 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
+import { ApiService } from '../../services/api.service';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,10 +33,12 @@ import { Subscription } from 'rxjs';
         </div>
         
         <div class="api-test">
-          <h2>API Test</h2>
-          <button class="test-button" (click)="testApiCall()">Test Graph API Call</button>
+          <h2>API Tests</h2>
+          <button class="test-button" (click)="testGraphApiCall()">Test Graph API Call</button>
+          <button class="test-button" (click)="testCustomApiCall()">Test Custom API Call</button>
           <div class="api-result" *ngIf="apiResult">
-            <pre>{{ apiResult | json }}</pre>
+            <h3>{{ apiResult.title }}</h3>
+            <pre>{{ apiResult.data | json }}</pre>
           </div>
         </div>
       </main>
@@ -101,6 +105,7 @@ import { Subscription } from 'rxjs';
       border-radius: 4px;
       cursor: pointer;
       margin-bottom: 1rem;
+      margin-right: 1rem;
     }
     
     .test-button:hover {
@@ -129,6 +134,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private httpClient: HttpClient,
+    private apiService: ApiService,
     private router: Router
   ) {}
 
@@ -148,7 +154,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   loadUserProfile(): void {
-    this.httpClient.get('https://graph.microsoft.com/v1.0/me').subscribe({
+    this.httpClient.get(`${environment.microsoftGraph.baseUrl}/me`).subscribe({
       next: (profile) => {
         this.userProfile = profile;
       },
@@ -158,13 +164,36 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  testApiCall(): void {
-    this.httpClient.get('https://graph.microsoft.com/v1.0/me').subscribe({
+  testGraphApiCall(): void {
+    this.httpClient.get(`${environment.microsoftGraph.baseUrl}/me`).subscribe({
       next: (result) => {
-        this.apiResult = result;
+        this.apiResult = {
+          title: 'Microsoft Graph API Result',
+          data: result
+        };
       },
       error: (error) => {
-        this.apiResult = { error: 'API call failed', details: error.message };
+        this.apiResult = {
+          title: 'Microsoft Graph API Error',
+          data: { error: 'API call failed', details: error.message }
+        };
+      }
+    });
+  }
+
+  testCustomApiCall(): void {
+    this.apiService.getWeatherForecast().subscribe({
+      next: (result) => {
+        this.apiResult = {
+          title: 'Custom API Result',
+          data: result
+        };
+      },
+      error: (error) => {
+        this.apiResult = {
+          title: 'Custom API Error',
+          data: { error: 'Custom API call failed', details: error.message }
+        };
       }
     });
   }

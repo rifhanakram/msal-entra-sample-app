@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "xtCp/pn1u4JgoBUpXnkxbZxbPl7dpIuuK8QJiKKNveM=",
+  "Source": "EntraAuthApi",
+  "BasePath": "_content/EntraAuthApi",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

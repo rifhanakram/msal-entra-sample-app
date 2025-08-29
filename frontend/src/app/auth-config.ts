@@ -25,11 +25,12 @@ export const msalConfig: Configuration = {
 };
 
 export const loginRequest = {
-  scopes: ['User.Read'],
+  scopes: ['User.Read'], // Initial login with Graph API scope
   domainHint: 'corzent.com',
   prompt: 'select_account',
 };
 
 export const protectedResourceMap = new Map<string, Array<string>>([
-  ['https://graph.microsoft.com/v1.0/me', ['User.Read']],
+  [environment.microsoftGraph.baseUrl + '/me', environment.microsoftGraph.scopes],
+  [environment.apiConfig.baseUrl.replace('/api', ''), [environment.apiConfig.scope]],
 ]);

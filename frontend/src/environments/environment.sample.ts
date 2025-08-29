@@ -3,6 +3,12 @@
 
 export const environment = {
   production: false,
+  apiConfig: {
+    // Backend API base URL for development
+    baseUrl: 'http://localhost:5219/api',
+    // Backend API scope for MSAL token acquisition
+    scope: 'api://your-api-client-id/access_as_user'
+  },
   msalConfig: {
     auth: {
       // Replace with your Azure App Registration client ID
@@ -22,6 +28,12 @@ export const environment = {
       // The URL where users will be redirected after logout
       postLogoutRedirectUri: 'http://localhost:4200/',
     }
+  },
+  microsoftGraph: {
+    // Microsoft Graph API base URL
+    baseUrl: 'https://graph.microsoft.com/v1.0',
+    // Microsoft Graph API scopes
+    scopes: ['User.Read']
   }
 };
 
@@ -29,5 +41,6 @@ export const environment = {
 // 1. Copy this file and rename it to 'environment.ts'
 // 2. Replace 'your-client-id-here' with your actual Azure App Registration client ID
 // 3. Replace 'your-tenant-id-here' with your actual Azure tenant ID
-// 4. Ensure the redirect URIs match exactly what you've configured in Azure
-// 5. For production, create a similar 'environment.prod.ts' file with production URLs
+// 4. Replace 'your-api-client-id' in the API scope with your backend API client ID
+// 5. Ensure the redirect URIs match exactly what you've configured in Azure
+// 6. For production, create a similar 'environment.prod.ts' file with production URLs

@@ -125,6 +125,7 @@ export class AuthService {
     );
   }
 
+
   getCurrentUser(): AccountInfo | null {
     this.ensureInitialized();
     
