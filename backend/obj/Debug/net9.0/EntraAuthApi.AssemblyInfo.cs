@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EntraAuthApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0991c962ecd052062d368ef9f6c0f3e096a6957b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ddca9134284b0d30eada3b77850b82c3e592f798")]
 [assembly: System.Reflection.AssemblyProductAttribute("EntraAuthApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EntraAuthApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

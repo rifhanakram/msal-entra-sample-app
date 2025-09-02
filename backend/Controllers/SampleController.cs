@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using EntraAuthApi.Services;
+using EntraAuthApi.Models;
 
 namespace EntraAuthApi.Controllers;
 
@@ -15,10 +17,12 @@ namespace EntraAuthApi.Controllers;
 public class SampleController : ControllerBase
 {
     private readonly ILogger<SampleController> _logger;
+    private readonly IJwtContextService _jwtContextService;
 
-    public SampleController(ILogger<SampleController> logger)
+    public SampleController(ILogger<SampleController> logger, IJwtContextService jwtContextService)
     {
         _logger = logger;
+        _jwtContextService = jwtContextService;
     }
 
     /// <summary>
@@ -34,9 +38,12 @@ public class SampleController : ControllerBase
     [ProducesResponseType(403)]
     public IActionResult GetAuthorizedData()
     {
-        _logger.LogInformation("Authorized endpoint accessed by user: {User}", User.Identity?.Name);
+        var userContext = _jwtContextService.UserContext;
         
-        var userClaims = User.Claims.Select(c => new ClaimInfo 
+        _logger.LogInformation("Authorized endpoint accessed by user: {UserId} ({Email})", 
+            userContext?.UserId, userContext?.Email);
+        
+        var userClaims = _jwtContextService.Claims.Select(c => new ClaimInfo 
         { 
             Type = c.Type, 
             Value = c.Value 
@@ -45,9 +52,11 @@ public class SampleController : ControllerBase
         var response = new AuthorizedDataResponse
         {
             Message = "This is authorized data from the API",
-            User = User.Identity?.Name ?? "Unknown",
+            User = userContext?.DisplayName ?? userContext?.Email ?? User.Identity?.Name ?? "Unknown",
             Claims = userClaims,
-            Timestamp = DateTime.UtcNow
+            Timestamp = DateTime.UtcNow,
+            // NEW: Populate response DTO with JWT context data
+            UserContext = userContext
         };
 
         return Ok(response);
@@ -82,6 +91,11 @@ public class AuthorizedDataResponse
     /// </summary>
     [Required]
     public DateTime Timestamp { get; set; }
+
+    /// <summary>
+    /// Structured user context populated from JWT token
+    /// </summary>
+    public UserContextDto? UserContext { get; set; }
 }
 
 /// <summary>

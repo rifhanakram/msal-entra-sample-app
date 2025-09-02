@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using EntraAuthApi;
+using EntraAuthApi.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 // Enable PII logging for debugging (ONLY in development)
@@ -113,6 +114,12 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 
+// Add JWT context services
+builder.Services.AddJwtContextServices();
+
+// Add allowed domain configuration
+builder.Configuration["AllowedDomain"] = "corzent.com";
+
 // Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -179,6 +186,7 @@ app.UseHttpsRedirection();
 app.UseCors();
 
 app.UseAuthentication();
+app.UseJwtDecoding();
 app.UseAuthorization();
 
 app.MapControllers();
