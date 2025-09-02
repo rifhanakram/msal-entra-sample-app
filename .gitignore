@@ -1,0 +1,41 @@
+# .NET Core
+backend/bin/
+backend/obj/
+*.dll
+*.pdb
+*.exe
+*.cache
+*.runtimeconfig.json
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+*.sln.docstates
+
+# Environment files
+*.env
+.env.local
+.env.production
+
+# Logs
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Node modules (for any npm packages)
+node_modules/
+
+# IDE files
+*.swp
+*.swo
+*~
