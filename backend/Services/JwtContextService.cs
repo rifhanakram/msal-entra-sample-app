@@ -87,7 +87,9 @@ public class JwtContextService : IJwtContextService
     
     private async Task<UserContextDto> BuildUserContextAsync(JwtSecurityToken token)
     {
-        var claims = token.Claims.ToDictionary(c => c.Type, c => c.Value, StringComparer.OrdinalIgnoreCase);
+        var claims = token.Claims
+            .GroupBy(c => c.Type, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.First().Value, StringComparer.OrdinalIgnoreCase);
         
         var userContext = new UserContextDto
         {
@@ -118,11 +120,11 @@ public class JwtContextService : IJwtContextService
             "iss", "aud", "sub", "nbf", "exp", "iat", "auth_time", "ver"
         };
         
-        foreach (var claim in token.Claims)
+        foreach (var claim in token.Claims.GroupBy(c => c.Type, StringComparer.OrdinalIgnoreCase))
         {
-            if (!standardClaims.Contains(claim.Type, StringComparer.OrdinalIgnoreCase))
+            if (!standardClaims.Contains(claim.Key, StringComparer.OrdinalIgnoreCase))
             {
-                userContext.AdditionalClaims[claim.Type] = claim.Value;
+                userContext.AdditionalClaims[claim.Key] = claim.First().Value;
             }
         }
         
