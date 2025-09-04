@@ -161,7 +161,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _userProfile?['mail'] ?? authService.currentAccount?.username ?? '',
+                        _userProfile?['mail'] ?? authService.currentUsername ?? '',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[600],
                         ),

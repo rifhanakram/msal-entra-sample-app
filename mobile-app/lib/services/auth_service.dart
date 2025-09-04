@@ -9,7 +9,8 @@ class AuthService extends ChangeNotifier {
   bool _isAuthenticated = false;
   String? _accessToken;
   String? _idToken;
-  Account? _currentAccount;
+  String? _currentUserIdentifier;
+  String? _currentUsername;
   String? _errorMessage;
   
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
@@ -19,7 +20,8 @@ class AuthService extends ChangeNotifier {
   bool get isAuthenticated => _isAuthenticated;
   String? get accessToken => _accessToken;
   String? get idToken => _idToken;
-  Account? get currentAccount => _currentAccount;
+  String? get currentUserIdentifier => _currentUserIdentifier;
+  String? get currentUsername => _currentUsername;
   String? get errorMessage => _errorMessage;
   
   // Initialize MSAL
@@ -47,16 +49,16 @@ class AuthService extends ChangeNotifier {
     if (_pca == null) return;
     
     try {
-      final accounts = await _pca!.getAccounts();
-      if (accounts.isNotEmpty) {
-        _currentAccount = accounts.first;
-        
-        // Try to get cached token
-        final cachedToken = await _secureStorage.read(key: 'access_token');
-        if (cachedToken != null) {
-          _accessToken = cachedToken;
-          _isAuthenticated = _isUserFromAllowedDomain();
-        }
+      // Try to get cached tokens and user info
+      final cachedToken = await _secureStorage.read(key: 'access_token');
+      final cachedUsername = await _secureStorage.read(key: 'username');
+      final cachedUserIdentifier = await _secureStorage.read(key: 'user_identifier');
+      
+      if (cachedToken != null && cachedUsername != null) {
+        _accessToken = cachedToken;
+        _currentUsername = cachedUsername;
+        _currentUserIdentifier = cachedUserIdentifier;
+        _isAuthenticated = _isUserFromAllowedDomain();
       }
     } catch (e) {
       debugPrint('Error checking existing account: $e');
@@ -78,13 +80,20 @@ class AuthService extends ChangeNotifier {
       final result = await _pca!.acquireToken(AppConfig.getDefaultScopes());
       
       if (result != null) {
-        _currentAccount = result.account;
+        _currentUsername = result.account?.username;
+        _currentUserIdentifier = result.account?.identifier;
         _accessToken = result.accessToken;
         _idToken = result.idToken;
         
-        // Store tokens securely
+        // Store tokens and user info securely
         await _secureStorage.write(key: 'access_token', value: _accessToken);
         await _secureStorage.write(key: 'id_token', value: _idToken);
+        if (_currentUsername != null) {
+          await _secureStorage.write(key: 'username', value: _currentUsername);
+        }
+        if (_currentUserIdentifier != null) {
+          await _secureStorage.write(key: 'user_identifier', value: _currentUserIdentifier);
+        }
         
         // Check domain restriction
         if (_isUserFromAllowedDomain()) {
@@ -112,16 +121,18 @@ class AuthService extends ChangeNotifier {
     if (_pca == null) return;
     
     try {
-      if (_currentAccount != null) {
-        await _pca!.removeAccount(_currentAccount!);
-      }
+      // Use signOut method instead of removeAccount for version 2.0.0
+      await _pca!.signOut();
       
-      // Clear stored tokens
+      // Clear stored tokens and user info
       await _secureStorage.delete(key: 'access_token');
       await _secureStorage.delete(key: 'id_token');
+      await _secureStorage.delete(key: 'username');
+      await _secureStorage.delete(key: 'user_identifier');
       
       // Clear state
-      _currentAccount = null;
+      _currentUsername = null;
+      _currentUserIdentifier = null;
       _accessToken = null;
       _idToken = null;
       _isAuthenticated = false;
@@ -135,12 +146,12 @@ class AuthService extends ChangeNotifier {
   
   // Get access token (refresh if needed)
   Future<String?> getAccessToken({List<String>? scopes}) async {
-    if (_pca == null || _currentAccount == null) return null;
+    if (_pca == null || _currentUserIdentifier == null) return null;
     
     try {
       final result = await _pca!.acquireTokenSilent(
         scopes ?? AppConfig.getDefaultScopes(),
-        _currentAccount!,
+        _currentUserIdentifier!,
       );
       
       if (result != null) {
@@ -160,13 +171,13 @@ class AuthService extends ChangeNotifier {
   
   // Check if user is from allowed domain
   bool _isUserFromAllowedDomain() {
-    if (_currentAccount?.username == null) return false;
-    return _currentAccount!.username!.endsWith('@${AppConfig.allowedDomain}');
+    if (_currentUsername == null) return false;
+    return _currentUsername!.endsWith('@${AppConfig.allowedDomain}');
   }
   
   // Get user display name
   String? getUserDisplayName() {
-    return _currentAccount?.username ?? _currentAccount?.identifier;
+    return _currentUsername ?? _currentUserIdentifier;
   }
   
   // Clear error message
